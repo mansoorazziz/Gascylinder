@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, simpledialog, messagebox
+from tkinter import ttk, simpledialog, messagebox,Label,Entry,Button
 import sqlite3,os,tempfile
 
 # Functionality Part
@@ -10,7 +10,12 @@ def connectandcreatetable():
     conn = sqlite3.connect('gascylinder.db')
     cursor = conn.cursor()
 
-    # Create tables
+
+# =======================================================================================
+    # Creating tables
+# =======================================================================================
+
+    # -------------Inventory Table creation---------------------------
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS inventory (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,11 +26,26 @@ def connectandcreatetable():
         date_received DATE NOT NULL
     );
     ''')
+
+    # -------------Sales Table creation--------------------------------
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sales (
+        sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        item_name TEXT NOT NULL,
+        quantity INTEGER NOT NULL,
+        price_per_item REAL NOT NULL,
+        total_price REAL NOT NULL,
+        sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    ''')
+
+
+
     conn.close()
 connectandcreatetable()
 
 # ===================================================================================================
-# Below this coding
+# Below this line coding
 # ===================================================================================================
 
 # ===================================================================================================
@@ -35,7 +55,53 @@ connectandcreatetable()
 
 def open_sales_window():
 
-    
+    def open_sales_view():
+        sales_view_window = tk.Toplevel()
+        sales_view_window.title("Sales Records")
+
+        columns = ("sale_id", "item_name", "quantity", "price_per_item", "total_price", "sale_date")
+        tree = ttk.Treeview(sales_view_window, columns=columns, show='headings')
+        tree.heading("sale_id", text="Sale ID")
+        tree.heading("item_name", text="Item Name")
+        tree.heading("quantity", text="Quantity")
+        tree.heading("price_per_item", text="Price per Item")
+        tree.heading("total_price", text="Total Price")
+        tree.heading("sale_date", text="Sale Date")
+
+        # Fetch sales data from the database
+        conn = sqlite3.connect('gascylinder.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sales")
+        sales_data = cursor.fetchall()
+        conn.close()
+        print(f"Fetched sales data: {sales_data}")
+
+        for sale in sales_data:
+            tree.insert('', 'end', values=sale)
+
+        tree.pack(fill='both', expand=True)
+        sales_view_window.mainloop()
+
+
+    class CustomDialog(tk.Toplevel):
+        def __init__(self, parent):
+            super().__init__(parent)
+            self.title("Enter Details")
+            
+            Label(self, text="Enter Quantity:", font=('times new roman',15,'bold'),background='gray20',foreground='white').grid(row=0, column=0, padx=10, pady=5)
+            self.quantity_entry = Entry(self,font=('arial',15),bd=7,width=18)
+            self.quantity_entry.grid(row=0, column=1, padx=10, pady=5)
+
+            Label(self, text="Enter Price:", font=('times new roman',15,'bold'),background='gray20',foreground='white').grid(row=1, column=0, padx=10, pady=5)
+            self.price_entry = Entry(self,font=('arial',15),bd=7,width=18)
+            self.price_entry.grid(row=1, column=1, padx=10, pady=5)
+
+            Button(self, text="Submit", command=self.on_submit, font=('arial', 12, 'bold'), background="gray20", foreground='white', bd=5, width=8, pady=10).grid(row=2, columnspan=2, pady=10)
+
+        def on_submit(self):
+            self.quantity = self.quantity_entry.get()
+            self.price = self.price_entry.get()
+            self.destroy()
 
     def logout():
         pass 
@@ -144,9 +210,15 @@ def open_sales_window():
             # priceofitem = cursor.fetchone()[0]
             # quantityofitem = cursor.fetchone()[1]
 
+            dialog = CustomDialog(sales_window)
+            sales_window.wait_window(dialog)
 
-            itemQuantity = simpledialog.askstring("Input", "Enter Quantity:", initialvalue="1", parent=sales_window)
-            if itemQuantity:
+            itemQuantity = dialog.quantity
+            itemPrice = dialog.price
+
+
+            # itemQuantity = simpledialog.askstring("Input", "Enter Quantity:", initialvalue="1", parent=sales_window)
+            if itemQuantity and itemPrice:
                 
                 remainingitemQuantity = quantityofitem - int(itemQuantity)
 
@@ -156,14 +228,28 @@ def open_sales_window():
                     WHERE item_name =?
                 ''', (remainingitemQuantity, item))
                 conn.commit()
-                conn.close()
+                # conn.close()
 
             # Do something with the entered string 
                 # print("Entered string:", itemQuantity)
-                itemPrice = int(itemQuantity) * int(priceofitem)
+                totalitemPrice = int(itemQuantity) * int(itemPrice)
+                totalPrice += totalitemPrice
 
-            totalPrice = totalPrice + int(itemPrice)
-            textArea.insert(tk.END, f' {item}\t\t{priceofitem}\t{itemQuantity}\t{itemPrice}\n')
+                # Save the sale record 
+                cursor.execute(''' 
+                    INSERT INTO sales (item_name, quantity, price_per_item, total_price, sale_date)
+                    VALUES (?, ?, ?, ?, datetime('now')) 
+                    ''', (item, int(itemQuantity), float(itemPrice), totalitemPrice))
+                print(f"Inserted sale: {item}, {itemQuantity}, {itemPrice}, {totalitemPrice}")
+                conn.commit
+
+                cursor.execute("SELECT * FROM sales") 
+                sales_data = cursor.fetchall() 
+                print(f"Data after insertion: {sales_data}")
+                conn.close
+
+            # totalPrice = totalPrice + int(itemPrice)
+                textArea.insert(tk.END, f' {item}\t\t{itemPrice}\t{itemQuantity}\t{totalitemPrice}\n')
             # print(f'Selected item is {item}')
         else:
             messagebox.INFO('Not Found','Unknown Error')
@@ -223,8 +309,8 @@ def open_sales_window():
                     foreground='white',bd=5,width=8,pady=10,command=total)
     totalbutton.grid(row=0,column=0,pady=5,padx=10)
 
-    billbutton=tk.Button(billmenuframe,text="Bill",font=('arial',16,'bold'),background="gray20",
-                            foreground='white',bd=5,width=8,pady=10, command=logout)
+    billbutton=tk.Button(billmenuframe,text="Sales View",font=('arial',16,'bold'),background="gray20",
+                            foreground='white',bd=5,width=8,pady=10, command=open_sales_view)
     billbutton.grid(row=1,column=0,pady=5,padx=10)
 
     emailbutton=tk.Button(billmenuframe,text="Email",font=('arial',16,'bold'),background="gray20",
