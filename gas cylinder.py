@@ -48,6 +48,78 @@ connectandcreatetable()
 # Below this line coding
 # ===================================================================================================
 
+def open_summary_view():
+    summary_view_window = tk.Toplevel()
+    summary_view_window.title("Summary View")
+    summary_view_window.geometry("1000x500")
+
+    headingLabel = tk.Label(summary_view_window, text="Summary View", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
+    headingLabel.pack(fill=tk.X, pady=5)
+
+    treeviewFrame = tk.Frame(summary_view_window, background='gray20', bd=8, relief=tk.GROOVE)
+    treeviewFrame.pack(fill=tk.X, pady=5)
+
+    columns = ("item_name", "purchased_price", "sale_price", "sale_quantity", "total_sale_price", "average_sale_price", "profit_per_item", "total_profit")
+    tree = ttk.Treeview(treeviewFrame, columns=columns, show='headings')
+    tree.heading("item_name", text="Item Name")
+    tree.heading("purchased_price", text="Purchased Price")
+    tree.heading("sale_price", text="Sale Price")
+    tree.heading("sale_quantity", text="Sale Quantity")
+    tree.heading("total_sale_price", text="Total Sale Price")
+    tree.heading("average_sale_price", text="Average Sale Price")
+    tree.heading("profit_per_item", text="Profit Per Item")
+    tree.heading("total_profit", text="Total Profit")
+
+    tree.column("item_name", width=150)
+    tree.column("purchased_price", width=100)
+    tree.column("sale_price", width=100)
+    tree.column("sale_quantity", width=100)
+    tree.column("total_sale_price", width=120)
+    tree.column("average_sale_price", width=120)
+    tree.column("profit_per_item", width=120)
+    tree.column("total_profit", width=120)
+
+    # Adding Vertical Scrollbar
+    vsb = ttk.Scrollbar(treeviewFrame, orient="vertical", command=tree.yview)
+    vsb.pack(side='right', fill='y')
+    tree.configure(yscrollcommand=vsb.set)
+
+    # Adding Horizontal Scrollbar
+    hsb = ttk.Scrollbar(treeviewFrame, orient="horizontal", command=tree.xview)
+    hsb.pack(side='bottom', fill='x')
+    tree.configure(xscrollcommand=hsb.set)
+    tree.pack(fill='both', expand=True)
+
+    # Fetch and compare data
+    conn = sqlite3.connect('gascylinder.db')
+    cursor = conn.cursor()
+    query = '''
+        SELECT i.item_name, i.purchase_price,
+               (SELECT s.price_per_item FROM sales s WHERE s.item_name = i.item_name LIMIT 1) AS sale_price,
+               (SELECT SUM(s.quantity) FROM sales s WHERE s.item_name = i.item_name) AS sale_quantity,
+               (SELECT SUM(s.total_price) FROM sales s WHERE s.item_name = i.item_name) AS total_sale_price,
+               (SELECT AVG(s.price_per_item) FROM sales s WHERE s.item_name = i.item_name) AS average_sale_price,
+               ((SELECT AVG(s.price_per_item) FROM sales s WHERE s.item_name = i.item_name) - i.purchase_price) AS profit_per_item,
+               (((SELECT AVG(s.price_per_item) FROM sales s WHERE s.item_name = i.item_name) - i.purchase_price) * (SELECT SUM(s.quantity) FROM sales s WHERE s.item_name = i.item_name)) AS total_profit
+        FROM inventory i
+    '''
+    cursor.execute(query)
+    summary_data = cursor.fetchall()
+    conn.close()
+    # print(f"Fetched summary data: {summary_data}")
+
+    for record in summary_data:
+        tree.insert('', 'end', values=record)
+
+    # Configure Treeview Style
+    style = ttk.Style()
+    style.configure("Treeview", rowheight=25)
+    style.configure("Treeview.Heading", font=('Calibri', 10,'bold'))
+    style.map('Treeview', background=[('selected', 'blue')])
+
+
+
+
 # ===================================================================================================
 # Sales Management function
 # ===================================================================================================
@@ -693,7 +765,7 @@ inventory_button.pack(side='left', padx=10)
 sales_button = tk.Button(button_frame, text="Record Sales", font=('Helvetica', 14), bg='gray30', fg='white', command=open_sales_window)
 sales_button.pack(side='left', padx=10)
 
-settings_button = tk.Button(button_frame, text="Settings", font=('Helvetica', 14), bg='gray30', fg='white')
-settings_button.pack(side='left', padx=10)
+summary_button = tk.Button(button_frame, text="Summary", font=('Helvetica', 14), bg='gray30', fg='white', command=open_summary_view)
+summary_button.pack(side='left', padx=10)
 
 root.mainloop()
