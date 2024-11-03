@@ -49,6 +49,13 @@ connectandcreatetable()
 # ===================================================================================================
 
 def open_summary_view():
+
+    def clearsummary():
+        pass
+
+    def printsummary():
+        pass
+
     summary_view_window = tk.Toplevel()
     summary_view_window.title("Summary View")
     summary_view_window.geometry("1000x500")
@@ -117,7 +124,16 @@ def open_summary_view():
     style.configure("Treeview.Heading", font=('Calibri', 10,'bold'))
     style.map('Treeview', background=[('selected', 'blue')])
 
+    inventorybuttonFrame = tk.Frame(summary_view_window, background='gray20', bd=8, relief=tk.GROOVE)
+    inventorybuttonFrame.pack(fill=tk.X, pady=5)
 
+    # Buttons
+    
+    delete_button = tk.Button(inventorybuttonFrame, text="Delete", font=('arial', 16, 'bold'), background="gray20", foreground='white', bd=5, width=8, pady=10, command=clearsummary)
+    delete_button.pack(side='left')
+
+    print_button = tk.Button(inventorybuttonFrame, text="Print", font=('arial', 16, 'bold'), background="gray20", foreground='white', bd=5, width=8, pady=10, command=printsummary)
+    print_button.pack(side='right')
 
 
 # ===================================================================================================
@@ -128,9 +144,34 @@ def open_sales_window():
 
     def open_sales_view():
 
+        def clear_treeview():
+            for item in tree.get_children():
+                tree.delete(item)
+
+        def delete_item():
+            selected_item = tree.selection()[0]  # Get selected item
+            item_values = tree.item(selected_item, 'values')  # Get values of the selected item
+            item_id = item_values[0]  # Assuming 'id' is the first value in the tuple
+
+            conn = sqlite3.connect('gascylinder.db')
+            cursor = conn.cursor()
+            cursor.execute('''
+                DELETE FROM sales WHERE sale_id = ?
+            ''', (item_id,))
+            conn.commit()
+            conn.close()
+            clear_treeview()
+
+            # tree.delete(selected_item)  # Remove the item from Treeview
+            readsales()
+            readitems()
+
+        def printsalesview():
+            pass
+
         sales_view_window = tk.Toplevel()
         sales_view_window.title("Sales Records")
-        sales_view_window.geometry("800x400")
+        sales_view_window.geometry("800x500")
 
         headingLabel = tk.Label(sales_view_window, text="Sales Records", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
         headingLabel.pack(fill=tk.X, pady=5)
@@ -173,45 +214,39 @@ def open_sales_window():
         style.configure("Treeview.Heading", font=('Calibri', 10,'bold'))
         style.map('Treeview', background=[('selected', 'blue')])
 
-        # sales_view_window = tk.Toplevel()
-        # sales_view_window.title("Sales Records")
-
-        # sales_view_window.geometry("800x500")
-
-        # headingLabel = tk.Label(sales_view_window, text="Sales Record", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
-        # headingLabel.pack(fill=tk.X, pady=5)
-
-        # columns = ("sale_id", "item_name", "quantity", "price_per_item", "total_price", "sale_date")
-        # tree = ttk.Treeview(sales_view_window, columns=columns, show='headings')
-        
-
-        # tree.column('sale_id', width=30)
-        # tree.column('item_name', width=150)
-        # tree.column('quantity', width=100)
-        # tree.column('price_per_item', width=100)
-        # tree.column('total_price', width=70)
-        # tree.column('6sale_date', width=70)
-
-        # tree.heading("sale_id", text="Sale ID")
-        # tree.heading("item_name", text="Item Name")
-        # tree.heading("quantity", text="Quantity")
-        # tree.heading("price_per_item", text="Price per Item")
-        # tree.heading("total_price", text="Total Price")
-        # tree.heading("sale_date", text="Sale Date")
-
         # Fetch sales data from the database
-        conn = sqlite3.connect('gascylinder.db')
-        cursor = conn.cursor()
+        def readsales():
 
-        cursor.execute("SELECT * FROM sales")
-        sales_data = cursor.fetchall()
-        conn.close()
-        print(f"Fetched sales data: {sales_data}")
+            conn = sqlite3.connect('gascylinder.db')
+            cursor = conn.cursor()
 
-        for sale in sales_data:
-            tree.insert('', 'end', values=sale)
+            cursor.execute("SELECT * FROM sales")
+            sales_data = cursor.fetchall()
+            conn.close()
+            # print(f"Fetched sales data: {sales_data}")
 
-        tree.pack(fill='both', expand=True)
+            for sale in sales_data:
+                tree.insert('', 'end', values=sale)
+
+            tree.pack(fill='both', expand=True)
+        
+        readsales()
+
+
+        inventorybuttonFrame = tk.Frame(sales_view_window, background='gray20', bd=8, relief=tk.GROOVE)
+        inventorybuttonFrame.pack(fill=tk.X, pady=5)
+
+        # Buttons
+        
+        delete_button = tk.Button(inventorybuttonFrame, text="Delete", font=('arial', 16, 'bold'), background="gray20", foreground='white', bd=5, width=8, pady=10, command=delete_item)
+        delete_button.pack(side='left')
+
+        print_button = tk.Button(inventorybuttonFrame, text="Print", font=('arial', 16, 'bold'), background="gray20", foreground='white', bd=5, width=8, pady=10, command=printsalesview)
+        print_button.pack(side='right')
+
+
+
+
         sales_view_window.mainloop()
 
 
@@ -397,10 +432,6 @@ def open_sales_window():
         else:
             messagebox.INFO('Not Found','Unknown Error')
 
-    
-
-
-
 
     sales_window = tk.Toplevel(root)
     sales_window.title("Sales Management")
@@ -467,6 +498,7 @@ def open_sales_window():
     clearbutton=tk.Button(billmenuframe,text="Clear",font=('arial',16,'bold'),background="gray20",
                     foreground='white',bd=5,width=8,pady=10,command=clearAll)
     clearbutton.grid(row=4,column=0,pady=5,padx=10)
+   
 
     sales_window.mainloop()
 
@@ -710,13 +742,6 @@ def open_inventory_window():
     update_button = tk.Button(inventorybuttonFrame, text="Update", font=('arial', 16, 'bold'), background="gray20", foreground='white', bd=5, width=8, pady=10, command=update_item)
     update_button.pack(side='right')
 
-    
-
-
-
-
-
-
 
 root = tk.Tk()
 root.title("Gas Cylinder Management System")
@@ -727,26 +752,67 @@ root.configure(bg='gray20')
 headingLabel = tk.Label(root, text="Gas Cylinder Management System", font=('Helvetica', 24, 'bold'), bg='gray20', fg='gold')
 headingLabel.pack(pady=20)
 
-# Inventory Overview Frame
+# ----------------------------------------Inventory Overview Frame-----------------------------------------------------
 inventory_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
 inventory_frame.place(relx=0.1, rely=0.2, relwidth=0.8, relheight=0.2)
 
 inventory_label = tk.Label(inventory_frame, text="Inventory Overview", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
 inventory_label.pack(pady=10)
 
-# Sales Summary Frame
+conn = sqlite3.connect('gascylinder.db')
+cursor = conn.cursor()
+cursor.execute("SELECT quantity FROM inventory")
+sales_data = cursor.fetchall()
+conn.close()
+# Extract the values from the tuple 
+total_quantity = sales_data[0][0]
+
+# Create separate labels 
+quantityLabel = tk.Label(inventory_frame, text=f'Remaining Stock = {total_quantity}', font=('Helvetica', 15 ), bg='gray25', fg='white') 
+quantityLabel.pack(pady=2)
+
+# ------------------------------------------Sales Summary Frame------------------------------------------------------
 sales_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
 sales_frame.place(relx=0.1, rely=0.45, relwidth=0.8, relheight=0.2)
 
 sales_label = tk.Label(sales_frame, text="Sales Summary", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
 sales_label.pack(pady=10)
+conn = sqlite3.connect('gascylinder.db')
+cursor = conn.cursor()
+cursor.execute("SELECT SUM(quantity),SUM(total_price) FROM sales")
+sales_data = cursor.fetchall()
+conn.close()
+# Extract the values from the tuple 
+total_quantity, total_price = sales_data[0]
 
-# Purchase Records Frame
+# Create separate labels 
+quantityLabel = tk.Label(sales_frame, text=f'Total Quantity Sold = {total_quantity}', font=('Helvetica', 15 ), bg='gray25', fg='white') 
+quantityLabel.pack(pady=2) 
+priceLabel = tk.Label(sales_frame, text=f'Total Sales Price = {total_price}', font=('Helvetica', 15), bg='gray25', fg='white') 
+priceLabel.pack(pady=2)
+
+
+
+# --------------------------------------------------Purchase Records Frame-------------------------------------------
 purchase_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
 purchase_frame.place(relx=0.1, rely=0.7, relwidth=0.8, relheight=0.2)
 
 purchase_label = tk.Label(purchase_frame, text="Purchase Records", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
 purchase_label.pack(pady=10)
+
+conn = sqlite3.connect('gascylinder.db')
+cursor = conn.cursor()
+cursor.execute("SELECT SUM(quantity),SUM(purchase_price) FROM inventory")
+sales_data = cursor.fetchall()
+conn.close()
+# Extract the values from the tuple 
+total_quantity, total_price = sales_data[0]
+
+# Create separate labels 
+quantityLabel = tk.Label(purchase_frame, text=f'Total Quantity purchased = {total_quantity}', font=('Helvetica', 15 ), bg='gray25', fg='white') 
+quantityLabel.pack(pady=2) 
+priceLabel = tk.Label(purchase_frame, text=f'Total Purchased Price = {total_price}', font=('Helvetica', 15), bg='gray25', fg='white') 
+priceLabel.pack(pady=2)
 
 # Safety Alerts Frame
 alerts_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
