@@ -24,23 +24,23 @@ def connectandcreatetable():
         quantity INTEGER NOT NULL,
         purchase_price REAL NOT NULL,
         date_received DATE NOT NULL
-    );
+        )
     ''')
+    conn.commit()
 
     # -------------Sales Table creation--------------------------------
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS sales (
-        sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        item_name TEXT NOT NULL,
-        quantity INTEGER NOT NULL,
-        price_per_item REAL NOT NULL,
-        total_price REAL NOT NULL,
-        sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+            sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_name TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            price_per_item REAL NOT NULL,
+            total_price REAL NOT NULL,
+            sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
     ''')
 
-
-
+    conn.commit()
     conn.close()
 connectandcreatetable()
 
@@ -52,15 +52,22 @@ connectandcreatetable()
 # Sales Management function
 # ===================================================================================================
 
-
 def open_sales_window():
 
     def open_sales_view():
+
         sales_view_window = tk.Toplevel()
         sales_view_window.title("Sales Records")
+        sales_view_window.geometry("800x400")
+
+        headingLabel = tk.Label(sales_view_window, text="Sales Records", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
+        headingLabel.pack(fill=tk.X, pady=5)
+
+        treeviewFrame = tk.Frame(sales_view_window, background='gray20', bd=8, relief=tk.GROOVE)
+        treeviewFrame.pack(fill=tk.X, pady=5)
 
         columns = ("sale_id", "item_name", "quantity", "price_per_item", "total_price", "sale_date")
-        tree = ttk.Treeview(sales_view_window, columns=columns, show='headings')
+        tree = ttk.Treeview(treeviewFrame, columns=columns, show='headings')
         tree.heading("sale_id", text="Sale ID")
         tree.heading("item_name", text="Item Name")
         tree.heading("quantity", text="Quantity")
@@ -68,9 +75,62 @@ def open_sales_window():
         tree.heading("total_price", text="Total Price")
         tree.heading("sale_date", text="Sale Date")
 
+        # Setting column widths
+        tree.column("sale_id", width=30)
+        tree.column("item_name", width=150)
+        tree.column("quantity", width=100)
+        tree.column("price_per_item", width=100)
+        tree.column("total_price", width=70)
+        tree.column("sale_date", width=70)
+
+        # Adding Vertical Scrollbar
+        vsb = ttk.Scrollbar(treeviewFrame, orient="vertical", command=tree.yview)
+        vsb.pack(side='right', fill='y')
+        tree.configure(yscrollcommand=vsb.set)
+
+        # Adding Horizontal Scrollbar
+        hsb = ttk.Scrollbar(treeviewFrame, orient="horizontal", command=tree.xview)
+        hsb.pack(side='bottom', fill='x')
+        tree.configure(xscrollcommand=hsb.set)
+        tree.pack(fill='both', expand=True)
+
+        
+        # Configure Treeview Style
+        style = ttk.Style()
+        style.configure("Treeview", rowheight=25)
+        style.configure("Treeview.Heading", font=('Calibri', 10,'bold'))
+        style.map('Treeview', background=[('selected', 'blue')])
+
+        # sales_view_window = tk.Toplevel()
+        # sales_view_window.title("Sales Records")
+
+        # sales_view_window.geometry("800x500")
+
+        # headingLabel = tk.Label(sales_view_window, text="Sales Record", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
+        # headingLabel.pack(fill=tk.X, pady=5)
+
+        # columns = ("sale_id", "item_name", "quantity", "price_per_item", "total_price", "sale_date")
+        # tree = ttk.Treeview(sales_view_window, columns=columns, show='headings')
+        
+
+        # tree.column('sale_id', width=30)
+        # tree.column('item_name', width=150)
+        # tree.column('quantity', width=100)
+        # tree.column('price_per_item', width=100)
+        # tree.column('total_price', width=70)
+        # tree.column('6sale_date', width=70)
+
+        # tree.heading("sale_id", text="Sale ID")
+        # tree.heading("item_name", text="Item Name")
+        # tree.heading("quantity", text="Quantity")
+        # tree.heading("price_per_item", text="Price per Item")
+        # tree.heading("total_price", text="Total Price")
+        # tree.heading("sale_date", text="Sale Date")
+
         # Fetch sales data from the database
         conn = sqlite3.connect('gascylinder.db')
         cursor = conn.cursor()
+
         cursor.execute("SELECT * FROM sales")
         sales_data = cursor.fetchall()
         conn.close()
@@ -81,6 +141,17 @@ def open_sales_window():
 
         tree.pack(fill='both', expand=True)
         sales_view_window.mainloop()
+
+
+        # cursor.execute("SELECT * FROM sales")
+        # sales_data = cursor.fetchall()
+        # conn.close()
+        # print(f"Fetched sales data: {sales_data}")
+
+        
+
+        # tree.pack(fill='both', expand=True)
+        # sales_view_window.mainloop()
 
 
     class CustomDialog(tk.Toplevel):
@@ -241,12 +312,12 @@ def open_sales_window():
                     VALUES (?, ?, ?, ?, datetime('now')) 
                     ''', (item, int(itemQuantity), float(itemPrice), totalitemPrice))
                 print(f"Inserted sale: {item}, {itemQuantity}, {itemPrice}, {totalitemPrice}")
-                conn.commit
+                conn.commit()
 
                 cursor.execute("SELECT * FROM sales") 
                 sales_data = cursor.fetchall() 
                 print(f"Data after insertion: {sales_data}")
-                conn.close
+                conn.close()
 
             # totalPrice = totalPrice + int(itemPrice)
                 textArea.insert(tk.END, f' {item}\t\t{itemPrice}\t{itemQuantity}\t{totalitemPrice}\n')
