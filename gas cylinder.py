@@ -47,6 +47,14 @@ connectandcreatetable()
 # ===================================================================================================
 # Below this line coding
 # ===================================================================================================
+def center_window(window):
+    window.update_idletasks()
+    width = window.winfo_width()
+    height = window.winfo_height()
+    x = (window.winfo_screenwidth() // 2) - (width // 2)
+    y = (window.winfo_screenheight() // 2) - (height // 2)
+    window.geometry(f'{width}x{height}+{x}+{y}')
+
 
 def open_summary_view():
 
@@ -59,6 +67,7 @@ def open_summary_view():
     summary_view_window = tk.Toplevel()
     summary_view_window.title("Summary View")
     summary_view_window.geometry("1000x500")
+    center_window(summary_view_window)
 
     headingLabel = tk.Label(summary_view_window, text="Summary View", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
     headingLabel.pack(fill=tk.X, pady=5)
@@ -172,6 +181,7 @@ def open_sales_window():
         sales_view_window = tk.Toplevel()
         sales_view_window.title("Sales Records")
         sales_view_window.geometry("800x500")
+        center_window(sales_view_window)
 
         headingLabel = tk.Label(sales_view_window, text="Sales Records", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
         headingLabel.pack(fill=tk.X, pady=5)
@@ -436,6 +446,7 @@ def open_sales_window():
     sales_window = tk.Toplevel(root)
     sales_window.title("Sales Management")
     sales_window.geometry("1200x600")
+    center_window(sales_window)
 
     headingLabel = tk.Label(sales_window, text="Sales Management", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
     headingLabel.pack(fill=tk.X, pady=5)
@@ -510,6 +521,7 @@ def open_inventory_window():
     inventory_window = tk.Toplevel()
     inventory_window.title("Inventory Management")
     inventory_window.geometry("800x500")
+    center_window(inventory_window)
 
     headingLabel = tk.Label(inventory_window, text="Inventory Management", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
     headingLabel.pack(fill=tk.X, pady=5)
@@ -581,6 +593,7 @@ def open_inventory_window():
         new_entry_window = tk.Toplevel(inventory_window)
         new_entry_window.title("New Entry")
         new_entry_window.geometry("550x450")
+        center_window(new_entry_window)
 
         headingLabel = tk.Label(new_entry_window, text="New Entry", font=('times new roman', 30, 'bold'), background='gray20', foreground='gold', bd=12, relief=tk.GROOVE)
         headingLabel.pack(fill=tk.X, pady=5)
@@ -742,21 +755,22 @@ def open_inventory_window():
     update_button = tk.Button(inventorybuttonFrame, text="Update", font=('arial', 16, 'bold'), background="gray20", foreground='white', bd=5, width=8, pady=10, command=update_item)
     update_button.pack(side='right')
 
-
+# ----------------------------------------------------------Main root Window---------------------------------------
 root = tk.Tk()
 root.title("Gas Cylinder Management System")
 root.geometry("800x600")
-root.configure(bg='gray20')
+root.configure(bg='#6667AB')
+center_window(root)
 
 # Dashboard Heading
-headingLabel = tk.Label(root, text="Gas Cylinder Management System", font=('Helvetica', 24, 'bold'), bg='gray20', fg='gold')
-headingLabel.pack(pady=20)
+headingLabel = tk.Label(root, text="ITTEFAQ TRADERS", font=('Helvetica', 24, 'bold'), bg='#6667AB', fg='#F5F0F6')
+headingLabel.pack(pady=10)
 
 # ----------------------------------------Inventory Overview Frame-----------------------------------------------------
-inventory_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
+inventory_frame = tk.Frame(root, bg='blue', bd=7, relief=tk.GROOVE)
 inventory_frame.place(relx=0.1, rely=0.2, relwidth=0.8, relheight=0.2)
 
-inventory_label = tk.Label(inventory_frame, text="Inventory Overview", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
+inventory_label = tk.Label(inventory_frame, text="Inventory Overview", font=('Helvetica', 16, 'bold'), bg='blue', fg='white')
 inventory_label.pack(pady=10)
 
 conn = sqlite3.connect('gascylinder.db')
@@ -764,18 +778,19 @@ cursor = conn.cursor()
 cursor.execute("SELECT quantity FROM inventory")
 sales_data = cursor.fetchall()
 conn.close()
+if sales_data:
 # Extract the values from the tuple 
-total_quantity = sales_data[0][0]
+    total_quantity = sales_data[0][0]
 
 # Create separate labels 
-quantityLabel = tk.Label(inventory_frame, text=f'Remaining Stock = {total_quantity}', font=('Helvetica', 15 ), bg='gray25', fg='white') 
-quantityLabel.pack(pady=2)
+    quantityLabel = tk.Label(inventory_frame, text=f'Remaining Stock = {total_quantity}', font=('Helvetica', 15 ), bg='blue', fg='white') 
+    quantityLabel.pack(pady=2)
 
 # ------------------------------------------Sales Summary Frame------------------------------------------------------
-sales_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
+sales_frame = tk.Frame(root, bg='green', bd=7, relief=tk.GROOVE)
 sales_frame.place(relx=0.1, rely=0.45, relwidth=0.8, relheight=0.2)
 
-sales_label = tk.Label(sales_frame, text="Sales Summary", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
+sales_label = tk.Label(sales_frame, text="Sales Summary", font=('Helvetica', 16, 'bold'), bg='green', fg='white')
 sales_label.pack(pady=10)
 conn = sqlite3.connect('gascylinder.db')
 cursor = conn.cursor()
@@ -786,18 +801,18 @@ conn.close()
 total_quantity, total_price = sales_data[0]
 
 # Create separate labels 
-quantityLabel = tk.Label(sales_frame, text=f'Total Quantity Sold = {total_quantity}', font=('Helvetica', 15 ), bg='gray25', fg='white') 
+quantityLabel = tk.Label(sales_frame, text=f'Total Quantity Sold = {total_quantity}', font=('Helvetica', 15 ), bg='green', fg='white') 
 quantityLabel.pack(pady=2) 
-priceLabel = tk.Label(sales_frame, text=f'Total Sales Price = {total_price}', font=('Helvetica', 15), bg='gray25', fg='white') 
+priceLabel = tk.Label(sales_frame, text=f'Total Sales Price = {total_price}', font=('Helvetica', 15), bg='green', fg='white') 
 priceLabel.pack(pady=2)
 
 
 
 # --------------------------------------------------Purchase Records Frame-------------------------------------------
-purchase_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
+purchase_frame = tk.Frame(root, bg='#CC2936', bd=7, relief=tk.GROOVE)
 purchase_frame.place(relx=0.1, rely=0.7, relwidth=0.8, relheight=0.2)
 
-purchase_label = tk.Label(purchase_frame, text="Purchase Records", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
+purchase_label = tk.Label(purchase_frame, text="Purchase Records", font=('Helvetica', 16, 'bold'), bg='#CC2936', fg='#F5F0F6')
 purchase_label.pack(pady=10)
 
 conn = sqlite3.connect('gascylinder.db')
@@ -809,29 +824,32 @@ conn.close()
 total_quantity, total_price = sales_data[0]
 
 # Create separate labels 
-quantityLabel = tk.Label(purchase_frame, text=f'Total Quantity purchased = {total_quantity}', font=('Helvetica', 15 ), bg='gray25', fg='white') 
+quantityLabel = tk.Label(purchase_frame, text=f'Total Quantity purchased = {total_quantity}', font=('Helvetica', 15 ), bg='#CC2936', fg='#F5F0F6') 
 quantityLabel.pack(pady=2) 
-priceLabel = tk.Label(purchase_frame, text=f'Total Purchased Price = {total_price}', font=('Helvetica', 15), bg='gray25', fg='white') 
+priceLabel = tk.Label(purchase_frame, text=f'Total Purchased Price = {total_price}', font=('Helvetica', 15), bg='#CC2936', fg='#F5F0F6') 
 priceLabel.pack(pady=2)
 
-# Safety Alerts Frame
-alerts_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
-alerts_frame.place(relx=0.1, rely=0.1, relwidth=0.8, relheight=0.1)
+# # Safety Alerts Frame
+# alerts_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
+# alerts_frame.place(relx=0.1, rely=0.1, relwidth=0.8, relheight=0.1)
 
-alerts_label = tk.Label(alerts_frame, text="Safety Alerts", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
-alerts_label.pack(pady=10)
+# alerts_label = tk.Label(alerts_frame, text="Safety Alerts", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
+# alerts_label.pack(pady=10)
 
 # Navigation Buttons
-button_frame = tk.Frame(root, bg='gray20')
-button_frame.pack(pady=20)
+button_frame = tk.Frame(root, bg='#6667AB')
+button_frame.pack(pady=10)
 
-inventory_button = tk.Button(button_frame, text="Manage Inventory", font=('Helvetica', 14), bg='gray30', fg='white', command=open_inventory_window)
+inventory_button = tk.Button(button_frame, text="Manage Inventory", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='blue', fg='white', command=open_inventory_window)
 inventory_button.pack(side='left', padx=10)
 
-sales_button = tk.Button(button_frame, text="Record Sales", font=('Helvetica', 14), bg='gray30', fg='white', command=open_sales_window)
+sales_button = tk.Button(button_frame, text="Record Sales", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='green', fg='white', command=open_sales_window)
 sales_button.pack(side='left', padx=10)
 
-summary_button = tk.Button(button_frame, text="Summary", font=('Helvetica', 14), bg='gray30', fg='white', command=open_summary_view)
+summary_button = tk.Button(button_frame, text="Summary", font=('Helvetica', 14), relief=tk.GROOVE, bd=5, bg='#22577A', fg='white', command=open_summary_view)
+summary_button.pack(side='left', padx=10)
+
+summary_button = tk.Button(button_frame, text="Costumers", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='#8DA9C4', fg='white')
 summary_button.pack(side='left', padx=10)
 
 root.mainloop()
