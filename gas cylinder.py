@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox,Label,Entry,Button
 import sqlite3,os,tempfile
+from PIL import Image,ImageTk
 
 # Functionality Part
 totalPrice = 0
@@ -732,10 +733,6 @@ def open_inventory_window():
         tk.Button(editentryFrame, text="Save", font=('arial', 12, 'bold'), background="gray20", foreground='white', bd=5, width=8, pady=10,command=save_changes).grid(row=5, column=0, columnspan=2, pady=10)
 
 
-
-
-
-
     inventorybuttonFrame = tk.Frame(inventory_window, background='gray20', bd=8, relief=tk.GROOVE)
     inventorybuttonFrame.pack(fill=tk.X, pady=5)
 
@@ -766,10 +763,24 @@ center_window(root)
 headingLabel = tk.Label(root, text="ITTEFAQ TRADERS", font=('Helvetica', 24, 'bold'), bg='#6667AB', fg='#F5F0F6')
 headingLabel.pack(pady=10)
 
+# List of image paths for buttons 
+# image_paths = [ "images/inventory.png", "images/sales.png", "images/customers.png", "images/reports.png" ]
+
 # ----------------------------------------Inventory Overview Frame-----------------------------------------------------
 inventory_frame = tk.Frame(root, bg='blue', bd=7, relief=tk.GROOVE)
-inventory_frame.place(relx=0.1, rely=0.2, relwidth=0.8, relheight=0.2)
+inventory_frame.place(relx=0.03, rely=0.13, relwidth=0.95, relheight=0.2)
+# inventory_frame = tk.Frame(root, bg='blue', bd=7, relief=tk.GROOVE)
+# inventory_frame.grid(row=0,column=0)
 
+# Load image 
+image_path = "images/invt.jpg" 
+image = Image.open(image_path) 
+image = image.resize((100, 100), 
+Image.LANCZOS) 
+img1 = ImageTk.PhotoImage(image)
+
+inventory_button = tk.Button(inventory_frame, image=img1, text="Manage Inventory", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='blue', fg='white', command=open_inventory_window)
+inventory_button.pack(side='left', padx=10)
 inventory_label = tk.Label(inventory_frame, text="Inventory Overview", font=('Helvetica', 16, 'bold'), bg='blue', fg='white')
 inventory_label.pack(pady=10)
 
@@ -786,9 +797,20 @@ if sales_data:
     quantityLabel = tk.Label(inventory_frame, text=f'Remaining Stock = {total_quantity}', font=('Helvetica', 15 ), bg='blue', fg='white') 
     quantityLabel.pack(pady=2)
 
-# ------------------------------------------Sales Summary Frame------------------------------------------------------
+# # ------------------------------------------Sales Summary Frame------------------------------------------------------
 sales_frame = tk.Frame(root, bg='green', bd=7, relief=tk.GROOVE)
-sales_frame.place(relx=0.1, rely=0.45, relwidth=0.8, relheight=0.2)
+sales_frame.place(relx=0.03, rely=0.35, relwidth=0.95, relheight=0.2)
+
+# Load image 
+image_path = "images/sales.jpg" 
+image = Image.open(image_path) 
+image = image.resize((100, 100), 
+Image.LANCZOS) 
+img2 = ImageTk.PhotoImage(image)
+
+sales_button = tk.Button(sales_frame, image=img2, text="Record Sales", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='green', fg='white', command=open_sales_window)
+sales_button.pack(side='left', padx=10)
+
 
 sales_label = tk.Label(sales_frame, text="Sales Summary", font=('Helvetica', 16, 'bold'), bg='green', fg='white')
 sales_label.pack(pady=10)
@@ -808,9 +830,20 @@ priceLabel.pack(pady=2)
 
 
 
-# --------------------------------------------------Purchase Records Frame-------------------------------------------
+# # --------------------------------------------------Purchase Records Frame-------------------------------------------
 purchase_frame = tk.Frame(root, bg='#CC2936', bd=7, relief=tk.GROOVE)
-purchase_frame.place(relx=0.1, rely=0.7, relwidth=0.8, relheight=0.2)
+purchase_frame.place(relx=0.03, rely=0.57, relwidth=0.95, relheight=0.2)
+
+# Load image 
+image_path = "images/reports.jpg" 
+image = Image.open(image_path) 
+image = image.resize((100, 100), 
+Image.LANCZOS) 
+img3 = ImageTk.PhotoImage(image)
+
+summary_button = tk.Button(purchase_frame, image=img3, text="Summary", font=('Helvetica', 14), relief=tk.GROOVE, bd=5, bg='#22577A', fg='white', command=open_summary_view)
+summary_button.pack(side='left', padx=10)
+
 
 purchase_label = tk.Label(purchase_frame, text="Purchase Records", font=('Helvetica', 16, 'bold'), bg='#CC2936', fg='#F5F0F6')
 purchase_label.pack(pady=10)
@@ -829,27 +862,57 @@ quantityLabel.pack(pady=2)
 priceLabel = tk.Label(purchase_frame, text=f'Total Purchased Price = {total_price}', font=('Helvetica', 15), bg='#CC2936', fg='#F5F0F6') 
 priceLabel.pack(pady=2)
 
-# # Safety Alerts Frame
-# alerts_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
-# alerts_frame.place(relx=0.1, rely=0.1, relwidth=0.8, relheight=0.1)
+# ----------------------------------------costumer Overview Frame-----------------------------------------------------
+costumer_frame = tk.Frame(root, bg='blue', bd=7, relief=tk.GROOVE)
+costumer_frame.place(relx=0.03, rely=0.79, relwidth=0.95, relheight=0.2)
+# inventory_frame = tk.Frame(root, bg='blue', bd=7, relief=tk.GROOVE)
+# inventory_frame.grid(row=0,column=0)
 
-# alerts_label = tk.Label(alerts_frame, text="Safety Alerts", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
-# alerts_label.pack(pady=10)
+# Load image 
+image_path = "images/invt.jpg" 
+image = Image.open(image_path) 
+image = image.resize((100, 100), 
+Image.LANCZOS) 
+img1 = ImageTk.PhotoImage(image)
 
-# Navigation Buttons
-button_frame = tk.Frame(root, bg='#6667AB')
-button_frame.pack(pady=10)
+costumer_button = tk.Button(costumer_frame, image=img1, text="Costumers", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='blue', fg='white', command=open_inventory_window)
+costumer_button.pack(side='left', padx=10)
+costumer_label = tk.Label(costumer_frame, text="Manage Costumers", font=('Helvetica', 16, 'bold'), bg='blue', fg='white')
+costumer_label.pack(pady=10)
 
-inventory_button = tk.Button(button_frame, text="Manage Inventory", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='blue', fg='white', command=open_inventory_window)
-inventory_button.pack(side='left', padx=10)
+# conn = sqlite3.connect('gascylinder.db')
+# cursor = conn.cursor()
+# cursor.execute("SELECT quantity FROM inventory")
+# sales_data = cursor.fetchall()
+# conn.close()
+# if sales_data:
+# # Extract the values from the tuple 
+#     total_quantity = sales_data[0][0]
 
-sales_button = tk.Button(button_frame, text="Record Sales", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='green', fg='white', command=open_sales_window)
-sales_button.pack(side='left', padx=10)
+# # Create separate labels 
+#     quantityLabel = tk.Label(inventory_frame, text=f'Remaining Stock = {total_quantity}', font=('Helvetica', 15 ), bg='blue', fg='white') 
+#     quantityLabel.pack(pady=2)
+# # # Safety Alerts Frame
+# # alerts_frame = tk.Frame(root, bg='gray25', bd=5, relief=tk.GROOVE)
+# # alerts_frame.place(relx=0.1, rely=0.1, relwidth=0.8, relheight=0.1)
 
-summary_button = tk.Button(button_frame, text="Summary", font=('Helvetica', 14), relief=tk.GROOVE, bd=5, bg='#22577A', fg='white', command=open_summary_view)
-summary_button.pack(side='left', padx=10)
+# # alerts_label = tk.Label(alerts_frame, text="Safety Alerts", font=('Helvetica', 16, 'bold'), bg='gray25', fg='white')
+# # alerts_label.pack(pady=10)
 
-summary_button = tk.Button(button_frame, text="Costumers", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='#8DA9C4', fg='white')
-summary_button.pack(side='left', padx=10)
+# # Navigation Buttons
+# button_frame = tk.Frame(root, bg='#6667AB')
+# button_frame.pack(pady=10)
+
+# inventory_button = tk.Button(button_frame, text="Manage Inventory", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='blue', fg='white', command=open_inventory_window)
+# inventory_button.pack(side='left', padx=10)
+
+# sales_button = tk.Button(button_frame, text="Record Sales", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='green', fg='white', command=open_sales_window)
+# sales_button.pack(side='left', padx=10)
+
+# summary_button = tk.Button(button_frame, text="Summary", font=('Helvetica', 14), relief=tk.GROOVE, bd=5, bg='#22577A', fg='white', command=open_summary_view)
+# summary_button.pack(side='left', padx=10)
+
+# summary_button = tk.Button(button_frame, text="Costumers", font=('Helvetica', 14), relief=tk.GROOVE, bd=5,bg='#8DA9C4', fg='white')
+# summary_button.pack(side='left', padx=10)
 
 root.mainloop()
